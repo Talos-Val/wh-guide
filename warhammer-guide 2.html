@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bolter & Primer — Warhammer für alle, die keine Ahnung haben</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #c9a84c;
+    --gold-light: #e8c97a;
+    --gold-dark: #8a6820;
+    --blood: #8b1a1a;
+    --blood-light: #c0392b;
+    --void: #080808;
+    --dark: #0f0e0c;
+    --mid: #1a1814;
+    --parchment: #d4c5a0;
+    --parchment-light: #e8dfc0;
+    --ash: #6b6560;
+    --white: #f5f0e8;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background-color: var(--void);
+    color: var(--parchment);
+    font-family: 'EB Garamond', Georgia, serif;
+    font-size: 17px;
+    line-height: 1.75;
+    overflow-x: hidden;
+  }
+
+  /* ── Noise Overlay ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* ── HERO ── */
+  #hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+    padding: 60px 24px;
+    background:
+      radial-gradient(ellipse 60% 50% at 50% 30%, rgba(201,168,76,0.08) 0%, transparent 70%),
+      radial-gradient(ellipse 80% 60% at 50% 100%, rgba(139,26,26,0.15) 0%, transparent 70%),
+      var(--void);
+    border-bottom: 1px solid var(--gold-dark);
+  }
+
+  .hero-sigil {
+    width: 90px;
+    height: 90px;
+    margin-bottom: 32px;
+    opacity: 0.85;
+    animation: pulse-sigil 4s ease-in-out infinite;
+  }
+
+  @keyframes pulse-sigil {
+    0%, 100% { filter: drop-shadow(0 0 6px rgba(201,168,76,0.4)); }
+    50% { filter: drop-shadow(0 0 18px rgba(201,168,76,0.8)); }
+  }
+
+  .hero-eyebrow {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 20px;
+    opacity: 0.75;
+  }
+
+  h1 {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(2.4rem, 7vw, 5.5rem);
+    font-weight: 900;
+    color: var(--gold-light);
+    line-height: 1.1;
+    letter-spacing: 0.03em;
+    text-shadow: 0 0 60px rgba(201,168,76,0.3), 0 2px 0 rgba(0,0,0,0.8);
+    margin-bottom: 16px;
+  }
+
+  h1 span { color: var(--white); }
+
+  .hero-sub {
+    font-size: 1.05rem;
+    color: var(--ash);
+    max-width: 500px;
+    margin: 0 auto 48px;
+    font-style: italic;
+  }
+
+  .hero-db-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 1px solid var(--gold-dark);
+    padding: 12px 28px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-db-link::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gold);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+    z-index: -1;
+  }
+
+  .hero-db-link:hover::before { transform: scaleX(1); }
+  .hero-db-link:hover { color: var(--void); border-color: var(--gold); }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    opacity: 0.4;
+    animation: bounce 2.5s ease-in-out infinite;
+  }
+
+  .scroll-hint span {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(8px); }
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(8,8,8,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(201,168,76,0.2);
+    padding: 0 24px;
+    overflow-x: auto;
+  }
+
+  nav ul {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    min-width: max-content;
+    margin: 0 auto;
+    max-width: 1100px;
+  }
+
+  nav ul li a,
+  nav ul li .nav-btn {
+    display: block;
+    font-family: 'Cinzel', serif;
+    font-size: 10.5px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ash);
+    text-decoration: none;
+    padding: 18px 20px;
+    transition: color 0.25s;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    cursor: pointer;
+    font-size: 10.5px;
+  }
+
+  nav ul li a:hover,
+  nav ul li .nav-btn:hover {
+    color: var(--gold);
+    border-bottom-color: var(--gold);
+  }
+
+  nav ul li.sep {
+    color: var(--gold-dark);
+    font-size: 18px;
+    padding: 0 4px;
+    opacity: 0.4;
+  }
+
+  /* ── SECTIONS ── */
+  section {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 80px 32px;
+  }
+
+  .section-label {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.45em;
+    text-transform: uppercase;
+    color: var(--blood-light);
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  h2 {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(1.6rem, 4vw, 2.6rem);
+    color: var(--gold-light);
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+
+  .divider {
+    width: 80px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 20px 0 32px;
+  }
+
+  h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    color: var(--gold);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    margin: 36px 0 10px;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+  }
+
+  p { margin-bottom: 14px; color: var(--parchment); }
+
+  .lore-block {
+    border-left: 2px solid var(--gold-dark);
+    padding: 20px 24px;
+    background: rgba(201,168,76,0.03);
+    margin: 28px 0;
+    font-style: italic;
+    color: var(--parchment-light);
+  }
+
+  .lore-block cite {
+    display: block;
+    margin-top: 10px;
+    font-style: normal;
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--gold-dark);
+    text-transform: uppercase;
+  }
+
+  /* ── TIMELINE ACCORDION ── */
+  .timeline {
+    margin: 32px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .tl-item {
+    border: 1px solid rgba(201,168,76,0.18);
+    background: rgba(201,168,76,0.02);
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+
+  .tl-item.open {
+    border-color: rgba(201,168,76,0.45);
+  }
+
+  .tl-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px 24px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.25s;
+  }
+
+  .tl-header:hover {
+    background: rgba(201,168,76,0.05);
+  }
+
+  .tl-header-left {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .tl-era {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    opacity: 0.75;
+  }
+
+  .tl-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 1rem;
+    color: var(--white);
+    line-height: 1.3;
+  }
+
+  .tl-chevron {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    border: 1px solid var(--gold-dark);
+    transform: rotate(45deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.35s ease, background 0.25s;
+    color: var(--gold-dark);
+    font-size: 12px;
+    background: rgba(201,168,76,0.03);
+  }
+
+  .tl-item.open .tl-chevron {
+    transform: rotate(225deg);
+    background: rgba(201,168,76,0.12);
+    color: var(--gold);
+  }
+
+  .tl-body {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.35s ease;
+  }
+
+  .tl-item.open .tl-body {
+    grid-template-rows: 1fr;
+  }
+
+  .tl-body-inner {
+    overflow: hidden;
+    padding: 0 24px;
+    border-top: 1px solid transparent;
+    transition: padding 0.35s ease, border-color 0.35s;
+  }
+
+  .tl-item.open .tl-body-inner {
+    padding: 20px 24px 24px;
+    border-top-color: rgba(201,168,76,0.1);
+  }
+
+  .tl-body-inner p {
+    margin: 0;
+    font-size: 0.93rem;
+    line-height: 1.8;
+    color: var(--parchment);
+  }
+
+  /* ── FACTION CARDS ── */
+  .faction-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 20px;
+    margin-top: 32px;
+  }
+
+  .faction-card {
+    border: 1px solid rgba(201,168,76,0.15);
+    padding: 24px 20px;
+    background: rgba(201,168,76,0.02);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .faction-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(201,168,76,0.06) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .faction-card:hover { border-color: rgba(201,168,76,0.4); }
+  .faction-card:hover::before { opacity: 1; }
+
+  .fc-allegiance {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .fc-allegiance.loyalist { color: #4a7fb5; }
+  .fc-allegiance.traitor { color: var(--blood-light); }
+  .fc-allegiance.xenos { color: #4ab57f; }
+  .fc-allegiance.independent { color: var(--ash); }
+
+  .fc-name {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 1rem;
+    color: var(--gold-light);
+    margin-bottom: 8px;
+  }
+
+  .fc-desc { font-size: 0.88rem; color: var(--ash); line-height: 1.6; }
+
+  /* ── GIFT GUIDE ── */
+  .gift-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+    margin-top: 32px;
+  }
+
+  .gift-card {
+    border: 1px solid rgba(201,168,76,0.12);
+    padding: 22px 18px;
+    background: rgba(255,255,255,0.01);
+    transition: all 0.3s;
+  }
+
+  .gift-card:hover { border-color: rgba(201,168,76,0.35); background: rgba(201,168,76,0.03); }
+
+  .gift-icon {
+    font-size: 28px;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .gift-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.82rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 6px;
+  }
+
+  .gift-desc { font-size: 0.85rem; color: var(--ash); line-height: 1.55; }
+
+  .gift-tag {
+    display: inline-block;
+    margin-top: 10px;
+    font-size: 9px;
+    font-family: 'Cinzel', serif;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold-dark);
+    border: 1px solid var(--gold-dark);
+    padding: 2px 8px;
+  }
+
+  /* ── CONVERSATION STARTERS ── */
+  .conv-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid rgba(201,168,76,0.2);
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+
+  .conv-tab {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ash);
+    padding: 14px 22px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.25s;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+  }
+
+  .conv-tab:hover { color: var(--gold); }
+  .conv-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+  .conv-panel { display: none; }
+  .conv-panel.active { display: block; }
+
+  .starter-list { list-style: none; }
+
+  .starter-list li {
+    padding: 16px 0;
+    border-bottom: 1px solid rgba(201,168,76,0.08);
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .starter-list li::before {
+    content: '⸻';
+    color: var(--gold-dark);
+    flex-shrink: 0;
+    margin-top: 2px;
+    font-size: 0.8rem;
+  }
+
+  .starter-q {
+    font-size: 0.95rem;
+    color: var(--parchment-light);
+  }
+
+  .starter-tip {
+    font-size: 0.82rem;
+    color: var(--ash);
+    margin-top: 4px;
+    font-style: italic;
+  }
+
+  /* ── SECTION SEPARATOR ── */
+  .sep-ornament {
+    text-align: center;
+    padding: 40px 0 0;
+    color: var(--gold-dark);
+    font-size: 22px;
+    opacity: 0.5;
+    letter-spacing: 0.5em;
+  }
+
+  hr.section-rule {
+    border: none;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(201,168,76,0.15), transparent);
+    margin: 0;
+  }
+
+  /* ── POPULAR OPINIONS ── */
+  .opinion-stack { margin-top: 32px; }
+
+  .opinion-item {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 20px;
+    align-items: start;
+    padding: 24px 0;
+    border-bottom: 1px solid rgba(201,168,76,0.08);
+  }
+
+  .opinion-text { font-size: 0.95rem; }
+  .opinion-label {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    padding-top: 4px;
+  }
+
+  .opinion-label.hot { color: var(--blood-light); }
+  .opinion-label.warm { color: var(--gold); }
+  .opinion-label.niche { color: var(--ash); }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid rgba(201,168,76,0.12);
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--ash);
+  }
+
+  footer .footer-logo {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 1.1rem;
+    color: var(--gold-dark);
+    margin-bottom: 10px;
+  }
+
+  footer p { font-size: 0.8rem; color: #3a3530; margin-bottom: 6px; }
+
+  footer a { color: var(--gold-dark); text-decoration: none; }
+  footer a:hover { color: var(--gold); }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  section > * { animation: fadeInUp 0.6s ease both; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    section { padding: 60px 20px; }
+    .faction-grid, .gift-grid { grid-template-columns: 1fr; }
+    nav ul li a { padding: 16px 12px; font-size: 9.5px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════ HERO ══════════════════════════════ -->
+<section id="hero">
+  <!-- Aquila SVG Sigil -->
+  <svg class="hero-sigil" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M50 10 L55 35 L80 20 L65 42 L90 45 L68 55 L80 80 L55 65 L50 90 L45 65 L20 80 L32 55 L10 45 L35 42 L20 20 L45 35 Z" stroke="#c9a84c" stroke-width="1.2" fill="rgba(201,168,76,0.06)"/>
+    <circle cx="50" cy="50" r="8" stroke="#c9a84c" stroke-width="1" fill="rgba(201,168,76,0.1)"/>
+    <circle cx="50" cy="50" r="2" fill="#c9a84c"/>
+  </svg>
+
+  <p class="hero-eyebrow">Prince of Crows präsentiert</p>
+  <h1>Bolter &<br><span>Primer</span></h1>
+  <p class="hero-sub">Alles, was du über Warhammer wissen musst — und nie zu fragen gewagt hast.</p>
+  <a href="https://talos-val.github.io/database" target="_blank" class="hero-db-link">
+    ⚙ Zur Datenbank
+  </a>
+
+  <div class="scroll-hint">
+    <span>Scroll</span>
+    <svg width="16" height="20" viewBox="0 0 16 20" fill="none">
+      <path d="M8 0v16M2 10l6 8 6-8" stroke="#c9a84c" stroke-width="1.2"/>
+    </svg>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ NAV ══════════════════════════════ -->
+<nav>
+  <ul>
+    <li><button class="nav-btn" onclick="scrollToSection('universe')">Das Universum</button></li>
+    <li class="sep">·</li>
+    <li><button class="nav-btn" onclick="scrollToSection('lore')">Grosse Epochen</button></li>
+    <li class="sep">·</li>
+    <li><button class="nav-btn" onclick="scrollToSection('factions')">Fraktionen</button></li>
+    <li class="sep">·</li>
+    <li><button class="nav-btn" onclick="scrollToSection('opinions')">Kontroversen</button></li>
+    <li class="sep">·</li>
+    <li><button class="nav-btn" onclick="scrollToSection('care')">Feldration & Tribut</button></li>
+    <li class="sep">·</li>
+    <li><button class="nav-btn" onclick="scrollToSection('starters')">Gesprächsmanöver</button></li>
+  </ul>
+</nav>
+
+<!-- ══════════════════════════════ WAS IST WARHAMMER ══════════════════════════════ -->
+<section id="universe">
+  <span class="section-label">Kapitel I</span>
+  <h2>Was zur Hölle ist Warhammer?</h2>
+  <div class="divider"></div>
+
+  <p>Warhammer 40.000 — kurz: <em>40k</em> — ist ein Tabletop-Wargame des britischen Verlags Games Workshop. Gespielt wird mit kleinen, meist selbst bemalten Miniaturfiguren aus Plastik oder Metall auf einem Spielfeld. Zwei Spieler stellen ihre Armeen gegenüber, würfeln, schreien leise innerlich, und am Ende hat meistens jemand verloren, weil er seine Punkte falsch berechnet hat.</p>
+
+  <p>Das Spiel selbst ist nur ein Teil des Phänomens. Das Universum von 40k ist eines der umfangreichsten Sci-Fantasy-Werke überhaupt: Tausende Seiten Romane (das sogenannte <em>Black Library</em>-Imprint), Videospiele, Animationsserien, Filme. Es ist düster, brutal, theologisch aufgeladen, und gelegentlich absurd selbstbewusst dabei.</p>
+
+  <div class="lore-block">
+    In the grim darkness of the far future, there is only war.
+    <cite>— Das offizielle Motto. 41. Jahrtausend. Kein Spaß gemeint.</cite>
+  </div>
+
+  <h3>Die zwei Hauptspiele</h3>
+  <p><strong style="color:var(--gold)">Warhammer 40.000 (40k)</strong> — Das gegenwärtige Setting: Das Jahr 40.999. Die Menschheit kämpft ums Überleben gegen Aliens, Dämonen und sich selbst. Der Kaiser der Menschheit sitzt seit 10.000 Jahren sterbend auf einem goldenen Thron auf Terra und hält durch reinen Willen die Galaxie zusammen. Kein Spaß.</p>
+
+  <p><strong style="color:var(--gold)">Horus Heresy (30k)</strong> — Das Prequel-Setting, etwa 10.000 Jahre früher. Hier geschieht die größte Tragödie des Universums: Hälfte der mächtigsten Krieger der Menschheit verrät sie. Das ist der Stoff, aus dem Mythen werden. Viele Spieler bevorzugen 30k wegen der höheren erzählerischen Dichte und der oft eleganteren Modelle.</p>
+</section>
+
+<div class="sep-ornament">✦ ✦ ✦</div>
+<hr class="section-rule">
+
+<!-- ══════════════════════════════ EPOCHEN ══════════════════════════════ -->
+<section id="lore">
+  <span class="section-label">Kapitel II</span>
+  <h2>Die Grossen Epochen</h2>
+  <div class="divider"></div>
+  <p>Das 40k-Universum hat eine Geschichte, die Jahrmillionen umspannt. Hier die Epochen, die du kennen musst, um mitreden zu können.</p>
+
+  <div class="timeline">
+
+    <div class="tl-item">
+      <div class="tl-header" onclick="toggleEpoch(this)">
+        <div class="tl-header-left">
+          <div class="tl-era">Urzeit — Vor dem Imperium</div>
+          <div class="tl-title">The Age of Terra & Dark Age of Technology</div>
+        </div>
+        <div class="tl-chevron">+</div>
+      </div>
+      <div class="tl-body">
+        <div class="tl-body-inner">
+          <p>Die Menschheit breitet sich in die Galaxis aus und entwickelt Technologien, die heute als Magie gelten würden. Dann kommt der Kollaps — eine Epoche des Chaos und Barbarei. Vergessen, aber bedeutsam.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-header" onclick="toggleEpoch(this)">
+        <div class="tl-header-left">
+          <div class="tl-era">Ca. 30.000 — 30k Setting</div>
+          <div class="tl-title">The Great Crusade</div>
+        </div>
+        <div class="tl-chevron">+</div>
+      </div>
+      <div class="tl-body">
+        <div class="tl-body-inner">
+          <p>Der Imperator — eine gottgleiche Überbegebenheit — eint die Menschheit unter seinem Banner. An seiner Seite: 20 Primarchs, genetisch perfekte Übermenschen, und ihre jeweiligen Space Marine Legionen. Das Imperium dehnt sich aus. Noch gibt es Hoffnung. Genieße es.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-header" onclick="toggleEpoch(this)">
+        <div class="tl-header-left">
+          <div class="tl-era">Ca. 30.005 — Wendepunkt</div>
+          <div class="tl-title">The Horus Heresy (HH)</div>
+        </div>
+        <div class="tl-chevron">+</div>
+      </div>
+      <div class="tl-body">
+        <div class="tl-body-inner">
+          <p>Horus Lupercal, beliebtester und mächtigster der Primarchs, wird korrumpiert. Neun Legionen folgen ihm in den Verrat. Neun bleiben loyal. Was folgt, ist der größte Bruderkrieg in der Geschichte der Galaxis, endet mit dem Belagerungskrieg auf Terra selbst, und dem Tod Horus' — sowie der Verwundung des Imperators, die ihn für immer lähmt. Alles, was danach kommt, ist Konsequenz dieses Moments.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-header" onclick="toggleEpoch(this)">
+        <div class="tl-header-left">
+          <div class="tl-era">31.000–41.000 — Der Lange Verfall</div>
+          <div class="tl-title">The Age of Imperium</div>
+        </div>
+        <div class="tl-chevron">+</div>
+      </div>
+      <div class="tl-body">
+        <div class="tl-body-inner">
+          <p>Zehntausend Jahre bürokratischen Zerfalls, religiösem Fanatismus und endloser Kriege. Der Imperator, auf seinem Goldenen Thron dem Tod trotzend, wird zur Gottheit verehrt — genau das, was er zeitlebens verboten hatte. Das Imperium existiert. Es ist nur nicht mehr schön dabei.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-header" onclick="toggleEpoch(this)">
+        <div class="tl-header-left">
+          <div class="tl-era">41.999 — Aktuelle Lore (40k)</div>
+          <div class="tl-title">The Era Indomitus</div>
+        </div>
+        <div class="tl-chevron">+</div>
+      </div>
+      <div class="tl-body">
+        <div class="tl-body-inner">
+          <p>Guilliman — loyaler Primarch, seit Jahrtausenden im Koma — erwacht. Er sieht, was aus dem Imperium geworden ist. Er ist nicht begeistert. Die Galaxis reißt buchstäblich entzwei (The Great Rift / Cicatrix Maledictum). Neue Primaris Space Marines werden eingeführt. Es ist kompliziert.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="sep-ornament">✦ ✦ ✦</div>
+<hr class="section-rule">
+
+<!-- ══════════════════════════════ FRAKTIONEN ══════════════════════════════ -->
+<section id="factions">
+  <span class="section-label">Kapitel III</span>
+  <h2>Wer kämpft gegen wen?</h2>
+  <div class="divider"></div>
+  <p>Es gibt viele Fraktionen. Hier eine Auswahl der bekanntesten, geordnet nach Allegiance.</p>
+
+  <div class="faction-grid">
+
+    <div class="faction-card">
+      <div class="fc-allegiance loyalist">⚜ Loyalisten</div>
+      <div class="fc-name">Space Marines</div>
+      <p class="fc-desc">Genetisch modifizierte Überkrieger im Dienst des Imperators. Jeder kennt sie. Zu viele spielen sie. Aus einem Grund: Sie sind unglaublich cool.</p>
+    </div>
+
+    <div class="faction-card">
+      <div class="fc-allegiance loyalist">⚜ Loyalisten</div>
+      <div class="fc-name">Adeptus Custodes</div>
+      <p class="fc-desc">Die persönliche Leibgarde des Imperators. Jeder Einzelne ist mächtiger als ein normaler Space Marine. Kleine Armee, enormer Stolz.</p>
+    </div>
+
+    <div class="faction-card">
+      <div class="fc-allegiance loyalist">⚜ Loyalisten</div>
+      <div class="fc-name">Astra Militarum</div>
+      <p class="fc-desc">Die imperiale Garde. Normale Menschen, schlechte Chancen, unglaubliche Mengen davon. Die wahren Helden des Imperiums — die nur niemand bemerkt.</p>
+    </div>
+
+    <div class="faction-card">
+      <div class="fc-allegiance traitor">☠ Traitors / Chaos</div>
+      <div class="fc-name">Chaos Space Marines</div>
+      <p class="fc-desc">Die gefallenen Legionen. Einst loyale Krieger, nun Diener der Chaosgötter. Komplex, tragisch, und mit den interessantesten Lore-Momenten.</p>
+    </div>
+
+    <div class="faction-card">
+      <div class="fc-allegiance traitor">☠ Chaos</div>
+      <div class="fc-name">Word Bearers</div>
+      <p class="fc-desc">Die erste verrätische Legion. Sie brachten den Chaos-Kult in den Rest der Traitor Legionen. Theologisch faszinierend, spielerisch eigenwillig.</p>
+    </div>
+
+    <div class="faction-card">
+      <div class="fc-allegiance xenos">✺ Xenos</div>
+      <div class="fc-name">Eldar / Aeldari</div>
+      <p class="fc-desc">Uralte, sterbende Alienrasse mit Präkognition und überlegener Technologie. Arrogant. Betrachten die Menschheit wie eine Plage — aber brauchen sie manchmal trotzdem.</p>
+    </div>
+
+    <div class="faction-card">
+      <div class="fc-allegiance xenos">✺ Xenos</div>
+      <div class="fc-name">Orks</div>
+      <p class="fc-desc">Fungus-basierte Kriegsgeschöpfe, die buchstäblich dann besser funktionieren, wenn sie glauben, dass sie gut funktionieren. Kollektiv-Psychokinese. Die Lore ist zu seltsam, um sie zu erfinden.</p>
+    </div>
+
+    <div class="faction-card">
+      <div class="fc-allegiance xenos">✺ Xenos</div>
+      <div class="fc-name">Tyraniden</div>
+      <p class="fc-desc">Extraterrestrischer Schwarmgeist. Kommen aus außerhalb der Galaxis. Fressen alles. Kein Verhandeln. Biologische Apokalypse als Fraktion.</p>
+    </div>
+
+    <div class="faction-card">
+      <div class="fc-allegiance xenos">✺ Xenos</div>
+      <div class="fc-name">Necrons</div>
+      <p class="fc-desc">Unsterbliche Roboter, die vor 65 Millionen Jahren ihre Körper aus Fleisch transferierten. Schlafen seit Äonen. Wachen gerade auf. Schlecht gelaunt.</p>
+    </div>
+
+    <div class="faction-card">
+      <div class="fc-allegiance independent">◈ Independent</div>
+      <div class="fc-name">Tau</div>
+      <p class="fc-desc">Junges, technologisch fortgeschrittenes Alienvolk. Team-player. Glauben ans Gemeinwohl ("Für das Größere Gut"). In 40k-Kontext geradezu utopisch — also natürlich unter Druck.</p>
+    </div>
+
+  </div>
+</section>
+
+<div class="sep-ornament">✦ ✦ ✦</div>
+<hr class="section-rule">
+
+<!-- ══════════════════════════════ KONTROVERSEN ══════════════════════════════ -->
+<section id="opinions">
+  <span class="section-label">Kapitel IV</span>
+  <h2>Was die Community wirklich denkt</h2>
+  <div class="divider"></div>
+  <p>Im Hobby gibt es Ansichten, die so weit verbreitet sind, dass sie fast kanonisch wirken. Hier ein Überblick — ohne Wertung, versteht sich.</p>
+
+  <div class="opinion-stack">
+
+    <div class="opinion-item">
+      <div>
+        <p class="opinion-text"><strong style="color:var(--parchment-light)">„Primaris haben die alten Space Marines ruiniert."</strong></p>
+        <p style="font-size:0.85rem;color:var(--ash)">Als Games Workshop 2017 eine neue, größere Marine-Generation einführte und die alte Linie sukzessive auslaufen ließ, war die Reaktion gespalten. Manche begrüßten die moderneren Modelle. Viele alteingesessene Spieler vermissen ihre alten Truppen.</p>
+      </div>
+      <span class="opinion-label hot">Heiß</span>
+    </div>
+
+    <div class="opinion-item">
+      <div>
+        <p class="opinion-text"><strong style="color:var(--parchment-light)">„Lore > Spiel. Das Gameplay ist zweitrangig."</strong></p>
+        <p style="font-size:0.85rem;color:var(--ash)">Ein signifikanter Teil der Community kauft, baut und bemalt Miniaturen, ohne je eine Partie zu spielen. Sie tun das für das Hobby, die Lore, die Ästhetik. Vollkommen legitim.</p>
+      </div>
+      <span class="opinion-label warm">Warm</span>
+    </div>
+
+    <div class="opinion-item">
+      <div>
+        <p class="opinion-text"><strong style="color:var(--parchment-light)">„Horus Heresy schlägt 40k in der Lore-Qualität."</strong></p>
+        <p style="font-size:0.85rem;color:var(--ash)">Die HH-Romanreihe (über 60 Bände) gilt vielen als literarisch ambitionierter und emotionaler als die 40k-Romane. Der Verrat und die Tragödie haben mehr Gewicht, wenn man die Charaktere vorher als Helden kennt.</p>
+      </div>
+      <span class="opinion-label warm">Warm</span>
+    </div>
+
+    <div class="opinion-item">
+      <div>
+        <p class="opinion-text"><strong style="color:var(--parchment-light)">„Der Imperator war ein Tyrann — aber er hatte recht."</strong></p>
+        <p style="font-size:0.85rem;color:var(--ash)">Die komplexeste Diskussion im Fandom. Der Imperator handelte ohne Mitgefühl — aber sein Plan, Chaos-Einfluss aus der Galaxis fernzuhalten, war nicht falsch. Der Disput über seine Methoden füllt Forenseiten.</p>
+      </div>
+      <span class="opinion-label hot">Heiß</span>
+    </div>
+
+    <div class="opinion-item">
+      <div>
+        <p class="opinion-text"><strong style="color:var(--parchment-light)">„Bemalte Armeen spielen besser."</strong></p>
+        <p style="font-size:0.85rem;color:var(--ash)">Kein statistischer Beleg vorhanden. Und trotzdem: Die Community glaubt kollektiv daran. Vielleicht weil man mit Herzblut bemalten Modellen einfach sorgfältiger spielt.</p>
+      </div>
+      <span class="opinion-label niche">Nische</span>
+    </div>
+
+    <div class="opinion-item">
+      <div>
+        <p class="opinion-text"><strong style="color:var(--parchment-light)">„Eisenhorn ist das beste, was Black Library je geschrieben hat."</strong></p>
+        <p style="font-size:0.85rem;color:var(--ash)">Dan Abnetts Inquisitor-Trilogie wird regelmäßig als Einstiegspunkt empfohlen. Sie funktioniert auch ohne Warhammer-Kenntnisse — und macht danach süchtig nach dem Rest.</p>
+      </div>
+      <span class="opinion-label warm">Warm</span>
+    </div>
+
+  </div>
+</section>
+
+<div class="sep-ornament">✦ ✦ ✦</div>
+<hr class="section-rule">
+
+<!-- ══════════════════════════════ GIFT GUIDE ══════════════════════════════ -->
+<section id="care">
+  <span class="section-label">Kapitel V</span>
+  <h2>Feldration & Tribut</h2>
+  <p style="font-style:italic;color:var(--ash);margin-bottom:4px;">— Was man einem Warhammer-Spieler schenkt, ohne es Schenken zu nennen</p>
+  <div class="divider"></div>
+
+  <p>Der Warhammer-Spieler ist ein Wesen mit spezifischen Bedürfnissen und einem Budget, das chronisch unter Belagerung steht. Hier: Geschenke, die nicht wie offensichtliche Geschenke aussehen, aber präzise treffen.</p>
+
+  <div class="gift-grid">
+
+    <div class="gift-card">
+      <span class="gift-icon">📚</span>
+      <div class="gift-name">Black Library Giftcard</div>
+      <p class="gift-desc">Zugang zum digitalen Romanverlag von Games Workshop. Tausende Seiten Lore. Sie wissen, was sie wollen — lass sie wählen.</p>
+      <span class="gift-tag">Universal</span>
+    </div>
+
+    <div class="gift-card">
+      <span class="gift-icon">🖌️</span>
+      <div class="gift-name">Citadel Hobby Supplies</div>
+      <p class="gift-desc">Pinsel, Verdünner, Primer-Spray. Verbrauchsgüter. Immer willkommen. Nie zu viel davon vorhanden. Frage: Was braucht er/sie gerade?</p>
+      <span class="gift-tag">Praktisch</span>
+    </div>
+
+    <div class="gift-card">
+      <span class="gift-icon">💡</span>
+      <div class="gift-name">Tageslichtlampe fürs Hobby</div>
+      <p class="gift-desc">Gute Beleuchtung verändert das Malen fundamental. Kaum jemand kauft sich das selbst. Ein Geschenk, das täglich Verwendung findet.</p>
+      <span class="gift-tag">Unterschätzt</span>
+    </div>
+
+    <div class="gift-card">
+      <span class="gift-icon">🎧</span>
+      <div class="gift-name">Audible-Abo</div>
+      <p class="gift-desc">Stundenlang Miniaturieren ohne etwas zu hören ist verschwendete Zeit. Black Library hat Dutzende Hörbücher — und die sind erstklassig produziert.</p>
+      <span class="gift-tag">Lifestyle</span>
+    </div>
+
+    <div class="gift-card">
+      <span class="gift-icon">🧰</span>
+      <div class="gift-name">Hobby-Tool-Set</div>
+      <p class="gift-desc">Skalpell, Zangen, Feilen — wer anfängt, hat meist Basiswerkzeug. Wer länger dabei ist, weiß, was gut ist. Fragen lohnt sich hier.</p>
+      <span class="gift-tag">Anfänger-Boost</span>
+    </div>
+
+    <div class="gift-card">
+      <span class="gift-icon">🪑</span>
+      <div class="gift-name">Ergonomisches Hocker-/Sitzkissen</div>
+      <p class="gift-desc">Warhammer-Spieler sitzen stundenlang. Niemand redet darüber. Ein gutes Sitzkissen oder Rückenstütze ist ein Geschenk von echter Fürsorge.</p>
+      <span class="gift-tag">Underrated</span>
+    </div>
+
+    <div class="gift-card">
+      <span class="gift-icon">☕</span>
+      <div class="gift-name">Hochwertiger Kaffee / Tee</div>
+      <p class="gift-desc">Hobby-Sessions dauern lang. Koffein ist Treibstoff. Guter Kaffee ist besser als No-Name, und signalisiert: Ich sehe, was du machst.</p>
+      <span class="gift-tag">Für alle</span>
+    </div>
+
+    <div class="gift-card">
+      <span class="gift-icon">🎨</span>
+      <div class="gift-name">Army Painter Speed Paints</div>
+      <p class="gift-desc">Schnelle Wash-Farben für effizientes Bemalen. Viele Spieler kennen die Marke — aber kaufen sich nicht alle Sets. Konkret und sinnvoll.</p>
+      <span class="gift-tag">Hobby-Upgrade</span>
+    </div>
+
+  </div>
+</section>
+
+<div class="sep-ornament">✦ ✦ ✦</div>
+<hr class="section-rule">
+
+<!-- ══════════════════════════════ CONVERSATION STARTERS ══════════════════════════════ -->
+<section id="starters">
+  <span class="section-label">Kapitel VI</span>
+  <h2>Gesprächsmanöver</h2>
+  <div class="divider"></div>
+  <p>Du willst mit jemandem über Warhammer reden, weißt aber nicht wie. Hier: Einstiegsfragen, die funktionieren — sortiert nach Fraktion und Setting.</p>
+
+  <div class="conv-tabs">
+    <button class="conv-tab active" onclick="showTab('loyalisten')">⚜ Loyalisten (30k)</button>
+    <button class="conv-tab" onclick="showTab('traitors')">☠ Traitors (30k)</button>
+    <button class="conv-tab" onclick="showTab('xenos40')">✺ Xenos (40k)</button>
+    <button class="conv-tab" onclick="showTab('imperium40')">☩ Imperium (40k)</button>
+    <button class="conv-tab" onclick="showTab('chaos40')">⛧ Chaos (40k)</button>
+  </div>
+
+  <!-- LOYALISTEN 30k -->
+  <div class="conv-panel active" id="tab-loyalisten">
+    <ul class="starter-list">
+      <li>
+        <div>
+          <div class="starter-q">„Welche Legion findest du am tragischsten — und warum nicht die Thousand Sons?"</div>
+          <div class="starter-tip">Öffnet sofort eine Debatte. Alle haben eine Meinung zur Tragödie der Magnus-Geschichte.</div>
+        </div>
+      </li>
+      <li>
+        <div>
+          <div class="starter-q">„Hätte Sanguinius Horus aufhalten können, wenn er wirklich gewollt hätte?"</div>
+          <div class="starter-tip">Eine der großen spekulativen Fragen der HH-Lore. Keine Standardantwort.</div>
+        </div>
+      </li>
+      <li>
+        <div>
+          <div class="starter-q">„Ultramarines — generisch oder unterschätzt?"</div>
+          <div class="starter-tip">Vorsicht: Das kann zu einer langen Diskussion führen. Gut so.</div>
+        </div>
+      </li>
+      <li>
+        <div>
+          <div class="starter-q">„Glaubst du, der Imperator wusste, dass Horus fallen würde?"</div>
+          <div class="starter-tip">Führt direkt in die tiefste Lore-Theologie. Gut für längere Sessions.</div>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- TRAITORS 30k -->
+  <div class="conv-panel" id="tab-traitors">
+    <ul class="starter-list">
+      <li>
+        <div>
+          <div class="starter-q">„Wer trägt mehr Schuld an der Heresy — Horus oder der Imperator?"</div>
+          <div class="starter-tip">Diese Frage spaltet die Community seit Jahrzehnten. Kein falsches Antwort, aber viele leidenschaftliche.</div>
+        </div>
+      </li>
+      <li>
+        <div>
+          <div class="starter-q">„Welche Traitor Legion hätte deiner Meinung nach loyal bleiben können?"</div>
+          <div class="starter-tip">Regt zur Beschäftigung mit den einzelnen Primarch-Motivationen an.</div>
+        </div>
+      </li>
+      <li>
+        <div>
+          <div class="starter-q">„Word Bearers — Fanatiker oder konsequenteste Fraktion im gesamten Universum?"</div>
+          <div class="starter-tip">Die Word Bearers sind die am meisten diskutierte Traitor Legion. Diese Frage trifft den Kern.</div>
+        </div>
+      </li>
+      <li>
+        <div>
+          <div class="starter-q">„Lorgar oder Erebus — wer ist der eigentliche Architekt der Heresy?"</div>
+          <div class="starter-tip">Für Leute, die tiefer in der HH-Lore sind. Sehr spezifisch, sehr effektiv.</div>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- XENOS 40k -->
+  <div class="conv-panel" id="tab-xenos40">
+    <ul class="starter-list">
+      <li>
+        <div>
+          <div class="starter-q">„Necrons oder Tyraniden — welche Bedrohung ist für die Galaxis langfristig schlimmer?"</div>
+          <div class="starter-tip">Zwei völlig verschiedene Endzeitszenarien. Spaltet Spieler oft nach ihrer Fraktion.</div>
+        </div>
+      </li>
+      <li>
+        <div>
+          <div class="starter-q">„Kannst du dir vorstellen, Tau zu spielen? Warum nicht?"</div>
+          <div class="starter-tip">Die Tau sind das ewige Stiefkind der Community. Viele Meinungen, viel Emotion.</div>
+        </div>
+      </li>
+      <li>
+        <div>
+          <div class="starter-q">„Wenn die Aeldari einfach sterben würden, wäre das Problem mit Slaanesh gelöst?"</div>
+          <div class="starter-tip">Provokant, aber korrekt als Lore-Frage gestellt. Öffnet die Eldar-Chaos-Diskussion.</div>
+        </div>
+      </li>
+      <li>
+        <div>
+          <div class="starter-q">„Glaubst du, dass Orks absichtlich so designed wurden oder ein Unfall sind?"</div>
+          <div class="starter-tip">Die Krork-Geschichte ist faszinierend. Wer sie kennt, erklärt sie gerne.</div>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- IMPERIUM 40k -->
+  <div class="conv-panel" id="tab-imperium40">
+    <ul class="starter-list">
+      <li>
+        <div>
+          <div class="starter-q">„Ist das Imperium das kleinere Übel — oder ist es selbst ein Monster?"</div>
+          <div class="starter-tip">Die fundamentale moralische Frage von 40k. Keine richtige Antwort. Viele leidenschaftliche.</div>
+        </div>
+      </li>
+      <li>
+        <div>
+          <div class="starter-q">„Space Marines oder Astra Militarum — wer gewinnt den Krieg wirklich?"</div>
+          <div class="starter-tip">Marines bekommen die Romane. Guard gewinnt die Zahlenspiele. Eine alte Diskussion.</div>
+        </div>
+      </li>
+      <li>
+        <div>
+          <div class="starter-q">„Wie lange kann das Imperium noch existieren, ohne sich zu reformieren?"</div>
+          <div class="starter-tip">Führt zur Guilliman-Diskussion und den aktuellen 40k-Lore-Entwicklungen.</div>
+        </div>
+      </li>
+      <li>
+        <div>
+          <div class="starter-q">„Was hältst du von den Primaris Marines — Rettung oder Verrat an der Tradition?"</div>
+          <div class="starter-tip">Sicheres Eis. Fast jeder Spieler hat dazu eine dezidierte Meinung.</div>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- CHAOS 40k -->
+  <div class="conv-panel" id="tab-chaos40">
+    <ul class="starter-list">
+      <li>
+        <div>
+          <div class="starter-q">„Khorne, Nurgle, Tzeentch oder Slaanesh — welchem Gott würdest du folgen, wenn du müsstest?"</div>
+          <div class="starter-tip">Klassiker. Funktioniert immer. Die Antwort sagt viel über den Spieler.</div>
+        </div>
+      </li>
+      <li>
+        <div>
+          <div class="starter-q">„Ist Chaos das Böse — oder nur ein Spiegel der Menschheit?"</div>
+          <div class="starter-tip">Philosophische Frage mit echter Lore-Grundlage. Chaos entsteht aus menschlichen Emotionen.</div>
+        </div>
+      </li>
+      <li>
+        <div>
+          <div class="starter-q">„Warum spielst du Chaos, wenn du weißt, dass sie nie wirklich gewinnen?"</div>
+          <div class="starter-tip">Chaos-Spieler haben immer eine Antwort darauf. Eine sehr ausführliche.</div>
+        </div>
+      </li>
+      <li>
+        <div>
+          <div class="starter-q">„Abaddon — kompetenter Schurke oder größte Enttäuschung der Lore?"</div>
+          <div class="starter-tip">Der ewige Meme-Streit. 13 Black Crusades, die alle... nicht ganz funktionierten. Bis jetzt.</div>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+</section>
+
+<!-- ══════════════════════════════ FOOTER ══════════════════════════════ -->
+<footer>
+  <div class="footer-logo">Bolter & Primer</div>
+  <p>Ein inoffizieller Leitfaden für alle, die jemanden verstehen wollen, der Warhammer spielt.</p>
+  <p style="margin-top:8px;">
+    <a href="https://talos-val.github.io/database" target="_blank">→ Zur Datenbank</a>
+  </p>
+  <p style="margin-top:24px;">© Prince of Crows — Alle Rechte vorbehalten.</p>
+  <p>Warhammer 40.000, Horus Heresy und alle zugehörigen Bezeichnungen sind Eigentum von Games Workshop Ltd.</p>
+</footer>
+
+<script>
+  function scrollToSection(id) {
+    document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function toggleEpoch(header) {
+    const item = header.closest('.tl-item');
+    const isOpen = item.classList.contains('open');
+    // Close all
+    document.querySelectorAll('.tl-item.open').forEach(el => el.classList.remove('open'));
+    // Open clicked if it wasn't open
+    if (!isOpen) item.classList.add('open');
+  }
+
+  function showTab(id) {
+    document.querySelectorAll('.conv-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.conv-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    event.target.classList.add('active');
+  }
+
+  // Scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.style.opacity = '1';
+        e.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.08 });
+
+  document.querySelectorAll('section > *').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px)';
+    el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    observer.observe(el);
+  });
+</script>
+
+</body>
+</html>
